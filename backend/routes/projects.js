@@ -19,7 +19,7 @@ router.post('/', auth, async (req, res) => {
     const savedProject = await newProject.save();
     res.status(201).json(savedProject);
   } catch (err) {
-    console.error("Gabim ne ruajtje:", err.message);
+    console.error("Error saving project:", err.message);
     res.status(400).json({ message: "Validation Error", error: err.message });
   }
 });
@@ -30,6 +30,7 @@ router.get('/', auth, async (req, res) => {
     const projects = await Project.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json(projects);
   } catch (err) {
+    console.error("Error fetching projects:", err.message);
     res.status(500).json({ message: "Server Error" });
   }
 });

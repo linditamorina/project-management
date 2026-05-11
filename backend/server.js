@@ -19,10 +19,10 @@ app.use('/api/projects', projectRoutes);
 
 // Lidhja me MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/visionDB')
-  .then(() => console.log("✅ Lidhja me MongoDB u krye!"))
-  .catch(err => console.error("❌ Gabim lidhjeje:", err));
+  .then(() => console.log("✅ MongoDB connection established successfully!"))
+  .catch(err => console.error("❌ Error connecting to MongoDB:", err));
 
 const PORT = 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Serveri po punon në portin ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });

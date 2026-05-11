@@ -11,16 +11,16 @@ router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
     let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ message: "Ky email ekziston!" });
+    if (user) return res.status(400).json({ message: "This email already exists!" });
 
     user = new User({ username, email, password });
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
     await user.save();
 
-    res.status(201).json({ message: "Përdoruesi u krijua!" });
+    res.status(201).json({ message: "User created successfully!" });
   } catch (err) {
-    res.status(500).json({ message: "Gabim në server", error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
@@ -29,10 +29,10 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Kredenciale të gabuara" });
+    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Kredenciale të gabuara" });
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     const payload = { user: { id: user.id } };
     jwt.sign(payload, JWT_SECRET, { expiresIn: '10h' }, (err, token) => {
@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
       res.json({ token, user: { id: user.id, username: user.username } });
     });
   } catch (err) {
-    res.status(500).json({ message: "Gabim në server", error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
