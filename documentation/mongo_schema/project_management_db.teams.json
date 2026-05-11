@@ -1,0 +1,28 @@
+[{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b3e1"
+  },
+  "name": "Backend Team",
+  "members": [
+    {
+      "$oid": "650c1f1a1c9d440000a1b2d2"
+    },
+    {
+      "$oid": "650c1f1a1c9d440000a1b2d3"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b3e2"
+  },
+  "name": "Core Management",
+  "members": [
+    {
+      "$oid": "650c1f1a1c9d440000a1b2d1"
+    },
+    {
+      "$oid": "650c1f1a1c9d440000a1b2d2"
+    }
+  ]
+}]

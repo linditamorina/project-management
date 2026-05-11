@@ -1,0 +1,24 @@
+[{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b2d1"
+  },
+  "name": "Agim Hoxha",
+  "email": "agim@test.com",
+  "role": "manager"
+},
+{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b2d2"
+  },
+  "name": "Bora Leka",
+  "email": "bora@test.com",
+  "role": "developer"
+},
+{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b2d3"
+  },
+  "name": "Dritan Prifti",
+  "email": "dritan@test.com",
+  "role": "developer"
+}]

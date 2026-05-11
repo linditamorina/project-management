@@ -1,0 +1,16 @@
+[{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b1c1"
+  },
+  "name": "Tech Corp",
+  "industry": "IT",
+  "contact_email": "info@techcorp.com"
+},
+{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b1c2"
+  },
+  "name": "Alpha Finance",
+  "industry": "Banking",
+  "contact_email": "contact@alpha.com"
+}]

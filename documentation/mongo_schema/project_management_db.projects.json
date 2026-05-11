@@ -1,0 +1,58 @@
+[{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b4f1"
+  },
+  "title": "E-Banking App",
+  "client_id": {
+    "$oid": "650c1f1a1c9d440000a1b1c2"
+  },
+  "status": "active",
+  "start_date": {
+    "$date": "2024-01-10T00:00:00Z"
+  },
+  "milestones": [
+    {
+      "name": "UI Design",
+      "deadline": {
+        "$date": "2024-02-01T00:00:00Z"
+      },
+      "completed": true
+    },
+    {
+      "name": "API Development",
+      "deadline": {
+        "$date": "2024-04-01T00:00:00Z"
+      },
+      "completed": false
+    },
+    {
+      "name": "Frontend Integration",
+      "deadline": {
+        "$date": "2024-05-15T00:00:00Z"
+      },
+      "completed": false
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "650c1f1a1c9d440000a1b4f2"
+  },
+  "title": "Server Migration",
+  "client_id": {
+    "$oid": "650c1f1a1c9d440000a1b1c1"
+  },
+  "status": "active",
+  "start_date": {
+    "$date": "2024-03-15T00:00:00Z"
+  },
+  "milestones": [
+    {
+      "name": "Backup Data",
+      "deadline": {
+        "$date": "2024-03-20T00:00:00Z"
+      },
+      "completed": true
+    }
+  ]
+}]
