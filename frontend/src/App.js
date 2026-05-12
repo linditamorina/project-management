@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 import "./App.css";
+import UserProfileModal from "./UserProfileModal";
+
 
 // ==========================================
 // 1. AUTHENTICATION COMPONENT (LOGIN/REGISTER)
@@ -10,6 +12,7 @@ function AuthPage({ setAuth }) {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,12 +23,18 @@ function AuthPage({ setAuth }) {
       
       if (isLogin) {
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        // Ensure we always have a username and email for the profile UI
+        const userData = {
+          ...(res.data.user || {}),
+          username: res.data.user?.username || res.data.user?.name || formData.username || formData.email.split('@')[0],
+          email: res.data.user?.email || formData.email
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
         setAuth(true);
       } else {
         setIsLogin(true);
         setFormData({ username: "", email: "", password: "" });
-        alert("Registration successful! You can now log in.");
+        setShowSuccessModal(true);
       }
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred!");
@@ -64,6 +73,19 @@ function AuthPage({ setAuth }) {
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <span>{isLogin ? "Register" : "Login"}</span>
         </div>
+
+        {showSuccessModal && (
+          <div className="modal-overlay">
+            <div className="auth-success-modal">
+              <div className="success-icon-circle">✔</div>
+              <h3>Registration Successful!</h3>
+              <p>Your account has been created. You can now log in to access your dashboard.</p>
+              <button className="auth-btn" onClick={() => setShowSuccessModal(false)}>
+                Got it!
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -76,6 +98,7 @@ function Dashboard({ setAuth }) {
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   
@@ -86,6 +109,9 @@ function Dashboard({ setAuth }) {
     client_id: "",
     milestones: [],
   });
+
+  // Get the logged-in user data
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user") || "{}"));
 
   useEffect(() => {
     fetchProjects();
@@ -228,60 +254,74 @@ function Dashboard({ setAuth }) {
           <button className="add-btn-sm" onClick={() => setShowModal(true)}>
             + New Project
           </button>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
+          <button className="profile-btn-sm" onClick={() => setShowProfileModal(true)} title={user.username || "My Profile"}>
+            {user.username ? user.username.charAt(0).toUpperCase() : "U"}
           </button>
         </div>
       </header>
 
-      <div className="compact-grid">
-        {projects.map((p) => {
-          // Përshtatje për të suportuar fushat e databazës
-          const displayTitle = p.projectName || p.title || "Anonimous Project";
-          const displayStatus = p.projectStatus || p.status || "active";
+      {projects.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🚀</div>
+          <h2>Welcome, {user.username || 'Visionary'}!</h2>
+          <p>
+            Your dashboard is looking a bit quiet. 
+            Start bringing your ideas to life by creating your first project.
+          </p>
+          <button className="add-btn-main" onClick={() => setShowModal(true)}>
+            Get Started
+          </button>
+        </div>
+      ) : (
+        <div className="compact-grid">
+          {projects.map((p) => {
+            // Përshtatje për të suportuar fushat e databazës
+            const displayTitle = p.projectName || p.title || "Anonimous Project";
+            const displayStatus = p.projectStatus || p.status || "active";
 
-          return (
-            <div key={p._id} className="compact-card">
-              <div className="card-top">
-                <h3 className="project-title">{p.projectName}</h3>
-                <div className="card-actions">
-                  <button className="action-btn edit" onClick={() => handleEditClick(p)} title="Edit">
-                    ✏️
-                  </button>
-                  <button className="action-btn delete" onClick={() => openDeleteModal(p._id)} title="Delete">
-                    🗑️
-                  </button>
+            return (
+              <div key={p._id} className="compact-card">
+                <div className="card-top">
+                  <h3 className="project-title">{p.projectName}</h3>
+                  <div className="card-actions">
+                    <button className="action-btn edit" onClick={() => handleEditClick(p)} title="Edit">
+                      ✏️
+                    </button>
+                    <button className="action-btn delete" onClick={() => openDeleteModal(p._id)} title="Delete">
+                      🗑️
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="progress-container">
-                <div className="progress-bar" style={{ width: `${calculateProgress(p.milestones)}%` }}></div>
-              </div>
-
-              <div className="status-row">
-                <span className={`status-pill-sm ${p.projectStatus}`}>
-                  {getStatusIcon(p.projectStatus)} {p.projectStatus.replace("_", " ")}
-                </span>
-                <p className="client-sm">
-                  Client: <span>{p.client_id || "N/A"}</span>
-                </p>
-              </div>
-
-              {p.milestones && p.milestones.length > 0 && (
-                <div className="mini-milestones">
-                  {p.milestones.map((m, i) => (
-                    <div key={i} className="m-dot">
-                      <span className="dot"></span>
-                      <span className="m-name">{m.name}</span>
-                      {m.completed ? "✅" : "⏳"}
-                    </div>
-                  ))}
+                <div className="progress-container">
+                  <div className="progress-bar" style={{ width: `${calculateProgress(p.milestones)}%` }}></div>
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+
+                <div className="status-row">
+                  <span className={`status-pill-sm ${p.projectStatus}`}>
+                    {getStatusIcon(p.projectStatus)} {p.projectStatus.replace("_", " ")}
+                  </span>
+                  <p className="client-sm">
+                    Client: <span>{p.client_id || "N/A"}</span>
+                  </p>
+                </div>
+
+                {p.milestones && p.milestones.length > 0 && (
+                  <div className="mini-milestones">
+                    {p.milestones.map((m, i) => (
+                      <div key={i} className="m-dot">
+                        <span className="dot"></span>
+                        <span className="m-name">{m.name}</span>
+                        {m.completed ? "✅" : "⏳"}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* PROJECT FORM MODAL */}
       {showModal && (
@@ -339,7 +379,7 @@ function Dashboard({ setAuth }) {
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="close-btn" onClick={closeModal}>Cancel</button>
+                <button type="button" className="modal-cancel-btn" onClick={closeModal}>Cancel</button>
                 <button type="submit" className="save-btn-sm">Save Changes</button>
               </div>
             </form>
@@ -355,12 +395,21 @@ function Dashboard({ setAuth }) {
             <h3>Delete Project?</h3>
             <p>Are you sure? This action cannot be undone.</p>
             <div className="modal-footer">
-              <button className="close-btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button className="delete-modal-cancel-btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
               <button className="confirm-delete-btn" onClick={confirmDelete}>Yes, Delete</button>
             </div>
           </div>
         </div>
       )}
+
+      {/* USER PROFILE MODAL */}
+      <UserProfileModal 
+        isOpen={showProfileModal} 
+        onClose={() => setShowProfileModal(false)} 
+        user={user}
+        onLogout={handleLogout}
+        onUpdate={setUser}
+      />
     </div>
   );
 }
