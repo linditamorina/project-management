@@ -50,7 +50,8 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
       
       // Prepare data - sending username and email for backend identification
       const updateData = { 
-        email: user?.email,
+        userId: user?._id || user?.id, // Send the database ID
+        email: user?.email,           // Fallback identifier
         username: formData.username, 
         name: formData.username 
       };
@@ -63,6 +64,7 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
       
       const updatedUser = {
         ...user,
+        ...res.data.user, // Prioritize data returned from server
         username: res.data.user?.username || formData.username,
         email: res.data.user?.email || user?.email,
       };
@@ -74,10 +76,12 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
       setTimeout(() => {
         setIsEditing(false);
         setSuccess('');
-      }, 2000);
+      }, 1500);
     } catch (err) {
       console.error("Full Error Response:", err.response);
-      setError(err.response?.data?.message || "Server Error: Profile could not be updated.");
+      const serverMessage = err.response?.data?.message;
+      const statusText = err.response?.status === 404 ? "Route not found (404). Check backend server.js" : "Update failed.";
+      setError(serverMessage || statusText);
     } finally {
       setLoading(false);
     }
@@ -158,4 +162,5 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
   );
 };
 
+// Exporting explicitly to prevent "undefined" import issues
 export default UserProfileModal;
