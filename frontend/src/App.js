@@ -100,6 +100,8 @@ function Dashboard({ setAuth }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'active', 'on_hold', 'completed'
   const [selectedId, setSelectedId] = useState(null);
   
   // Përditësuar për t'u përputhur me MongoDB: projectName dhe projectStatus
@@ -117,21 +119,24 @@ function Dashboard({ setAuth }) {
     fetchProjects();
   }, []);
 
-  // Funksion ndihmës për të marrë headers me token
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      headers: { Authorization: `Bearer ${token}` }
-    };
-  };
-
   const fetchProjects = () => {
-    axios.get("http://localhost:5000/api/projects", getAuthHeaders())
+    const token = localStorage.getItem("token");
+    const headers = { Authorization: `Bearer ${token}` };
+
+    axios.get("http://localhost:5000/api/projects", { headers })
       .then((res) => setProjects(res.data))
       .catch((err) => {
         console.error("Fetch error:", err);
         if (err.response && err.response.status === 401) handleLogout();
       });
+  };
+
+  // Helper for other calls
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+      headers: { Authorization: `Bearer ${token}` }
+    };
   };
 
   const handleLogout = () => {
@@ -244,6 +249,15 @@ function Dashboard({ setAuth }) {
     return Math.round((completed / milestones.length) * 100);
   };
 
+  // REAL-TIME FILTERING LOGIC
+  const filteredProjects = projects.filter((p) => {
+    const name = (p.projectName || p.title || "").toLowerCase();
+    const status = p.projectStatus || p.status || "active";
+    const matchesSearch = name.includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === "all" || status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
     <div className="dashboard">
       <header className="compact-header">
@@ -260,6 +274,33 @@ function Dashboard({ setAuth }) {
         </div>
       </header>
 
+      {projects.length > 0 && (
+        <div className="dashboard-controls">
+          <div className="search-bar-container">
+            <span className="search-icon-inside">🔍</span>
+            <input
+              type="text"
+              placeholder="Search projects by name..."
+              className="dashboard-search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-pill-container">
+            <select
+              className="dashboard-filter-select"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Projects</option>
+              <option value="active">Active</option>
+              <option value="on_hold">On Hold</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+      )}
+
       {projects.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🚀</div>
@@ -274,11 +315,11 @@ function Dashboard({ setAuth }) {
         </div>
       ) : (
         <div className="compact-grid">
-          {projects.map((p) => {
-            // Përshtatje për të suportuar fushat e databazës
-            const displayTitle = p.projectName || p.title || "Anonimous Project";
-            const displayStatus = p.projectStatus || p.status || "active";
-
+          {filteredProjects.length === 0 ? (
+            <div className="no-results">
+              <p>No projects match your search or filter.</p>
+            </div>
+          ) : filteredProjects.map((p) => {
             return (
               <div key={p._id} className="compact-card">
                 <div className="card-top">

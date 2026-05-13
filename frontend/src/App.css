@@ -42,6 +42,85 @@ body {
   padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;
 }
 
+/* Dashboard Controls Bar */
+.dashboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  /* Removing the heavy outer box for a cleaner, modern look */
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+.search-bar-container {
+  position: relative;
+  flex: 1; /* Search bar takes available space */
+}
+
+.filter-pill-container {
+  flex: 0 0 auto; /* Filter keeps its natural size */
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 2; /* Ensures the icon renders above the input backdrop and blur */
+}
+
+.dashboard-search-input, .dashboard-filter-select {
+  width: 94%;
+  height: 42px;
+  background: rgba(30, 41, 59, 0.25);
+  border: 1px solid var(--glass-border);
+  color: white;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dashboard-search-input {
+  padding: 0 15px 0 40px;
+}
+
+.dashboard-filter-select {
+  padding: 0 35px 0 15px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+.dashboard-search-input:hover, .dashboard-filter-select:hover {
+  background: rgba(30, 41, 59, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dashboard-search-input:focus, .dashboard-filter-select:focus {
+  border-color: var(--neon-glow);
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-style: italic;
+}
 .compact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 

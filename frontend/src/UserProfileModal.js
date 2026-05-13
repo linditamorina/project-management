@@ -9,7 +9,7 @@ import './UserProfileModal.css';
 const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    username: user?.username || '',
+    username: '',
     password: '',
     confirmPassword: ''
   });
@@ -17,19 +17,18 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Sync form data only when the modal opens to prevent resetting inputs while typing
+  // Sync form data whenever the modal opens to ensure latest user data is used
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isEditing) {
       setFormData({
-        username: user?.username || user?.name || '',
+        username: String(user?.username || user?.name || ''),
         password: '',
         confirmPassword: ''
       });
-      setIsEditing(false);
       setError('');
       setSuccess('');
     }
-  }, [isOpen]); // Only reset when the modal is first opened to allow editing
+  }, [isOpen, isEditing, user]);
 
   if (!isOpen) return null;
 
@@ -37,7 +36,7 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
     setError('');
     setSuccess('');
 
-    if (!formData.username.trim()) {
+    if (!formData.username || !formData.username.trim()) {
       return setError("Username cannot be empty!");
     }
 
@@ -49,9 +48,9 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
       setLoading(true);
       const token = localStorage.getItem("token");
       
-      // Prepare data - sending username, name, and email for backend identification
+      // Prepare data - sending username and email for backend identification
       const updateData = { 
-        email: user.email,
+        email: user?.email,
         username: formData.username, 
         name: formData.username 
       };
@@ -62,11 +61,10 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      // Sync updated data back to the app state
       const updatedUser = {
         ...user,
-        username: res.data.user?.username || res.data.user?.name || formData.username,
-        email: res.data.user?.email || user.email,
+        username: res.data.user?.username || formData.username,
+        email: res.data.user?.email || user?.email,
       };
 
       localStorage.setItem("user", JSON.stringify(updatedUser));
@@ -79,7 +77,7 @@ const UserProfileModal = ({ isOpen, onClose, user, onLogout, onUpdate }) => {
       }, 2000);
     } catch (err) {
       console.error("Full Error Response:", err.response);
-      setError(err.response?.data?.message || "Server Error: Update failed. Please ensure the backend supports PUT /api/auth/update.");
+      setError(err.response?.data?.message || "Server Error: Profile could not be updated.");
     } finally {
       setLoading(false);
     }
